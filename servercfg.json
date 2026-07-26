@@ -1,0 +1,6 @@
+{
+    "logging": {
+        "enabled": true,
+        "log_debug": true
+    }
+}
