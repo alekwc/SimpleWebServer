@@ -10,7 +10,9 @@ const logger: Logger = new Logger();
 (async()=>{
     await logger.createLogFile();
 
-    settings = await fs.readFile("./servercfg.json")
+    const data: string = await fs.readFile("./servercfg.json", "utf-8");
+    settings = JSON.parse(data);
+
     logger.enabled = settings.logging.enabled;
     logger.writeDebug = settings.logging.log_debug;
 })()
@@ -19,7 +21,7 @@ const logger: Logger = new Logger();
 const server = http.createServer(async (req, res) => {
     const url = new URL(req.url ?? "", `http://${req.headers.host}`);
 
-    await logger.log(`Got new GET request to ${url.href}`, "DEBUG")
+    await logger.log(`Got new GET request to ${url.href}`, "DEBUG");
     
     if (url.pathname.slice(-5) === ".html") {
         response.redirect(res, url.pathname.replace(url.pathname.slice(-5), ""));
@@ -27,7 +29,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (["/index", "/home", "/homepage"].includes(url.pathname)) {
-        response.redirect(res, "/")
+        response.redirect(res, "/");
         return;
     }
 

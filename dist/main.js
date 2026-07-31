@@ -8,8 +8,14 @@ const promises_1 = __importDefault(require("node:fs/promises"));
 const response_1 = __importDefault(require("./response"));
 const logger_1 = require("./logger");
 const node_readline_1 = __importDefault(require("node:readline"));
+let settings;
 const logger = new logger_1.Logger();
-logger.createLogFile();
+(async () => {
+    await logger.createLogFile();
+    settings = await promises_1.default.readFile("./servercfg.json");
+    logger.enabled = settings.logging.enabled;
+    logger.writeDebug = settings.logging.log_debug;
+})();
 const server = node_http_1.default.createServer(async (req, res) => {
     const url = new URL(req.url ?? "", `http://${req.headers.host}`);
     await logger.log(`Got new GET request to ${url.href}`, "DEBUG");
@@ -52,16 +58,11 @@ rl.on("line", async (input) => {
         process.exit(0);
     }
     else if (command[0] === "logging") {
-        if (command[1] === "enabled") {
-            if (command[2] === "enabled") {
-                logger.enabled = true;
-            }
-            else if (command[2] === "disabled") {
-                logger.enabled = false;
-            }
-            else {
-                console.log("Sate for 'enabled' can only be 'enabled' or 'disabled'");
-            }
+        if (command[2] === "enabled") {
+            logger.enabled = true;
+        }
+        else if (command[2] === "disabled") {
+            logger.enabled = false;
         }
         else if (command[1] === "log-debug") {
             if (command[2] === "enabled") {
